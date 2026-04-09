@@ -1,0 +1,21 @@
+﻿ProductID,ProductName,CategoryID,Price
+1,Laptop,1,1200
+2,Smartphone,1,800
+3,Headphones,1,150
+4,T-shirt,2,25
+5,Jeans,2,40
+6,Jacket,2,70
+7,Coffee Maker,3,90
+8,Blender,3,60
+9,Vacuum Cleaner,3,200
+10,Novel,4,15
+11,Cookbook,4,30
+12,Notebook,4,10
+13,Basketball,5,25
+14,Yoga Mat,5,35
+15,Treadmill,5,500
+16,Tablet,1,400
+17,Monitor,1,250
+18,Sneakers,2,60
+19,Mixer,3,75
+20,Football,5,30
