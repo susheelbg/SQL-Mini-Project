@@ -156,7 +156,7 @@ INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity) VALUES
 (27, 17, 7, 1),
 (28, 18, 8, 1),
 (29, 19, 9, 2),
-(30, 20, 10, 1);
+(30, 20, 10, 1);  
 
 
 select * from OrderItems
@@ -164,3 +164,189 @@ select * from Orders
 select * from Products
 select * from Categories 
 select * from Customers;
+
+
+
+----List all customers with their city and country
+
+SELECT Name, City, Country
+FROM Customers;  
+
+-----Show all products along with their category names
+    
+SELECT p.ProductName, c.CategoryName
+FROM Products p
+JOIN Categories c ON p.CategoryID = c.CategoryID;
+
+
+----Display all orders with customer names and order dates
+
+SELECT o.OrderID, c.Name, o.OrderDate
+FROM Orders o
+JOIN Customers c ON o.CustomerID = c.CustomerID;
+
+
+----Find the total number of orders placed
+
+SELECT COUNT(*) AS TotalOrders
+FROM Orders;
+
+
+----List all order items with product name and quantity 
+
+SELECT oi.OrderItemID, p.ProductName, oi.Quantity
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID;
+
+-----Calculate total revenue
+
+SELECT SUM(p.Price * oi.Quantity) AS TotalRevenue
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID; 
+
+------Find total revenue for each product
+
+SELECT p.ProductName, SUM(p.Price * oi.Quantity) AS Revenue
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID
+GROUP BY p.ProductName
+ORDER BY Revenue DESC;
+
+-----Find total revenue by category
+
+SELECT c.CategoryName, SUM(p.Price * oi.Quantity) AS Revenue
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID
+JOIN Categories c ON p.CategoryID = c.CategoryID
+GROUP BY c.CategoryName
+ORDER BY Revenue DESC;
+
+----Top 5 customers based on total spending
+
+SELECT TOP 5 c.Name, SUM(p.Price * oi.Quantity) AS TotalSpent
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+JOIN OrderItems oi ON o.OrderID = oi.OrderID
+JOIN Products p ON oi.ProductID = p.ProductID
+GROUP BY c.Name
+ORDER BY TotalSpent DESC;
+
+-----Most sold product (by quantity)
+
+SELECT TOP 1 p.ProductName, SUM(oi.Quantity) AS TotalSold
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID 
+GROUP BY p.ProductName
+ORDER BY TotalSold DESC;
+
+-------------Least sold product 
+
+
+SELECT top 1 p.ProductName, SUM(oi.Quantity) AS TotalSold
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID
+GROUP BY p.ProductName
+ORDER BY TotalSold ASC;
+
+---Average order value 
+
+SELECT AVG(OrderTotal) AS AvgOrderValue
+FROM (
+    SELECT o.OrderID, SUM(p.Price * oi.Quantity) AS OrderTotal
+    FROM Orders o
+    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+    JOIN Products p ON oi.ProductID = p.ProductID
+    GROUP BY o.OrderID
+) t;
+
+----Number of orders per customer 
+
+SELECT c.Name, COUNT(o.OrderID) AS TotalOrders
+FROM Customers c
+LEFT JOIN Orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.Name
+ORDER BY TotalOrders DESC; 
+
+------Customers who placed more than one order
+
+SELECT c.Name, COUNT(o.OrderID) AS OrderCount
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.Name
+HAVING COUNT(o.OrderID) > 1; 
+
+-----Total quantity sold per category
+
+SELECT c.CategoryName, SUM(oi.Quantity) AS TotalQuantity
+FROM OrderItems oi
+JOIN Products p ON oi.ProductID = p.ProductID
+JOIN Categories c ON p.CategoryID = c.CategoryID
+GROUP BY c.CategoryName
+ORDER BY TotalQuantity DESC;
+
+---Rank customers based on total spending
+
+SELECT 
+    c.Name,
+    SUM(p.Price * oi.Quantity) AS TotalSpent,
+    RANK() OVER (ORDER BY SUM(p.Price * oi.Quantity) DESC) AS RankPosition
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+JOIN OrderItems oi ON o.OrderID = oi.OrderID
+JOIN Products p ON oi.ProductID = p.ProductID
+GROUP BY c.Name;
+
+---Running (cumulative) revenue by date
+
+SELECT 
+    o.OrderDate,
+    SUM(p.Price * oi.Quantity) AS DailyRevenue,
+    SUM(SUM(p.Price * oi.Quantity)) OVER (ORDER BY o.OrderDate) AS RunningRevenue
+FROM Orders o
+JOIN OrderItems oi ON o.OrderID = oi.OrderID
+JOIN Products p ON oi.ProductID = p.ProductID
+GROUP BY o.OrderDate
+ORDER BY o.OrderDate;
+
+---------Highest value order for each customer 
+
+SELECT *
+FROM (
+    SELECT 
+        c.Name,
+        o.OrderID,
+        SUM(p.Price * oi.Quantity) AS OrderValue,
+        RANK() OVER (PARTITION BY c.CustomerID ORDER BY SUM(p.Price * oi.Quantity) DESC) AS rnk
+    FROM Customers c
+    JOIN Orders o ON c.CustomerID = o.CustomerID
+    JOIN OrderItems oi ON o.OrderID = oi.OrderID
+    JOIN Products p ON oi.ProductID = p.ProductID
+    GROUP BY c.Name, o.OrderID, c.CustomerID
+) t
+WHERE rnk = 1;
+
+----Customers who placed only one order
+
+SELECT c.Name
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+GROUP BY c.Name
+HAVING COUNT(o.OrderID) = 1;
+
+-----Top-selling category using CTE 
+
+WITH CategorySales AS (
+    SELECT 
+        c.CategoryName,
+        SUM(oi.Quantity) AS TotalSold
+    FROM OrderItems oi
+    JOIN Products p ON oi.ProductID = p.ProductID
+    JOIN Categories c ON p.CategoryID = c.CategoryID
+    GROUP BY c.CategoryName
+)
+SELECT TOP 1 *
+FROM CategorySales
+ORDER BY TotalSold DESC;
+
+
+
