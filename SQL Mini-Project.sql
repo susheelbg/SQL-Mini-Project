@@ -181,30 +181,30 @@ JOIN Categories c ON p.CategoryID = c.CategoryID;
 
 ----Display all orders with customer names and order dates
 
-SELECT o.OrderID, c.Name, o.OrderDate
+SELECT o.OrderID, c.Name, o.OrderDate--
 FROM Orders o
 JOIN Customers c ON o.CustomerID = c.CustomerID;
 
 
-----Find the total number of orders placed
+----Find the total number of orders placed---
 
 SELECT COUNT(*) AS TotalOrders
 FROM Orders;
 
 
-----List all order items with product name and quantity 
+----List all order items with product name and quantity ---
 
 SELECT oi.OrderItemID, p.ProductName, oi.Quantity
 FROM OrderItems oi
 JOIN Products p ON oi.ProductID = p.ProductID;
 
------Calculate total revenue
+-----Calculate total revenue----
 
 SELECT SUM(p.Price * oi.Quantity) AS TotalRevenue
 FROM OrderItems oi
 JOIN Products p ON oi.ProductID = p.ProductID; 
 
-------Find total revenue for each product
+------Find total revenue for each product---
 
 SELECT p.ProductName, SUM(p.Price * oi.Quantity) AS Revenue
 FROM OrderItems oi
@@ -212,7 +212,7 @@ JOIN Products p ON oi.ProductID = p.ProductID
 GROUP BY p.ProductName
 ORDER BY Revenue DESC;
 
------Find total revenue by category
+-----Find total revenue by category----
 
 SELECT c.CategoryName, SUM(p.Price * oi.Quantity) AS Revenue
 FROM OrderItems oi
